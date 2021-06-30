@@ -8,12 +8,16 @@ from stable_baselines.common.evaluation import evaluate_policy
 import matplotlib.pyplot as plt
 from array2gif import write_gif
 import numpy as np
+from LunarLauncher.envs import LunarLauncher
 
 def train_model(env_name:str, time_steps:str,model_name:str,callback_freq: int):
     log_dir = os.getcwd()
 
     # Create environment
-    env = gym.make(env_name)
+    try:
+        env = gym.make(env_name)
+    except: 
+        env = LunarLauncher()
     env = Monitor(env, log_dir)
     callback = SaveOnBestTrainingRewardCallback(check_freq=callback_freq, log_dir=log_dir,filename =model_name)
 
@@ -24,9 +28,12 @@ def train_model(env_name:str, time_steps:str,model_name:str,callback_freq: int):
 
     results_plotter.plot_results([log_dir], time_steps, results_plotter.X_TIMESTEPS, model_name)
     plt.show()
-
+    try:
+        env = gym.make(env_name)
+    except: 
+        env = LunarLauncher()
     # Load the best trained agent
-    model = DQN.load(callback.save_path+'/'+model_name,env=gym.make(env_name))
+    model = DQN.load(callback.save_path+'/'+model_name,env=env)
 
     # Evaluate the agent
    # mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=10)
